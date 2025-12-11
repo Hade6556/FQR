@@ -12,7 +12,6 @@ export async function importCalendarMock(): Promise<{ success: boolean; error?: 
     return { success: false, error: "Not authenticated" };
   }
 
-  // Update user to mark calendar as connected
   db.updateUser(user.id, { gcal_connected: true });
 
   revalidatePath("/");
@@ -25,22 +24,29 @@ export async function getFreeHours(): Promise<CalendarStats> {
   const user = await getCurrentUser();
 
   if (!user) {
-    return { todayTasks: [], freeHours: 0, studiedHours: 0 };
+    return {
+      todayTasks: [],
+      freeHours: 0,
+      studiedHours: 0,
+      events: [],
+      nextEvent: null,
+      freeSlots: [],
+    };
   }
 
-  // Check if user has connected calendar
   const userData = db.getUserById(user.id);
 
   if (!userData?.gcal_connected) {
-    // Return default values if calendar not connected
     return {
       todayTasks: ["Kalendorius neprijungtas"],
       freeHours: 8,
       studiedHours: 0,
+      events: [],
+      nextEvent: null,
+      freeSlots: [],
     };
   }
 
-  // Return mock calendar data
   return getMockCalendarData();
 }
 
